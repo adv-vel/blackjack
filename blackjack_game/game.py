@@ -2,25 +2,18 @@ from random import shuffle
 
 
 class Player:
-
     def __init__(self, money):
         self.money = money
-
         self.hand = []
         self.hand_num_values = []
         self.hand_value = 0
 
-    def place_bet(self, bet_value):
-        self.bet_value = bet_value
-        self.money = self.money - self.bet_value
+    def clear_hand(self):
+        self.hand = []
+        self.hand_num_values = []
+        self.hand_value = 0
 
-    def payout(self, odds, bet_type):
-        if bet_type == "main":
-            self.money += odds * self.bet_value
-        elif bet_type == "insurance":
-            self.money += odds * self.insurance_bet_value
-        else:
-            self.money += odds * self.insurance_bet_value
+
 class Card:
 
     def __init__(self, value, suit):
@@ -37,21 +30,42 @@ class Card:
     def __repr__(self):
         return str(self.value) + " of " + str(self.suit)
 
+
 class House:
-    def __init__(self, suits):
+    def __init__(self, decks):
+
+        self.decks = decks
 
         self.shoe = []
-        for x in range(0, decks):
+        for x in range(0, self.decks):
             for s in ["Spades", "Diamonds", "Clubs", "Hearts"]:
                 for v in [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]:
                     self.shoe.append(Card(v, s))
+        shuffle(self.shoe)
+        self.hand = []
+        self.hand_num_values = []
+        self.hand_value = 0
+
+    def clear_hand(self):
+        self.hand = []
+        self.hand_num_values = []
+        self.hand_value = 0
+
+    def new_shoe(self):
+        self.shoe = []
+        for x in range(0, self.decks):
+            for s in ["Spades", "Diamonds", "Clubs", "Hearts"]:
+                for v in [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]:
+                    self.shoe.append(Card(v, s))
+        shuffle(self.shoe)
 
 
 class Game:
 
-    def __init__(self, decks, player, bet_value):
+    def __init__(self, decks, player, house, bet_value):
         self.shoe = []
         self.player = player
+        self.house = house
         self.house_hand = []
         self.house_hand_value = 0
         self.house_hand_num_values = []
@@ -61,33 +75,32 @@ class Game:
                 for v in [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]:
                     self.shoe.append(Card(v, s))
 
-    def shoe_shuffle(self):
-        shuffle(self.shoe)
-
     def player_draw(self):
-        player_card = self.shoe.pop()
+        player_card = self.house.shoe.pop()
         self.player.hand.append(player_card)
         self.player.hand_num_values.append(player_card.num_value)
         self.player.hand_value += player_card.num_value
 
     def house_draw(self):
-        house_card = self.shoe.pop()
-        self.house_hand.append(house_card)
-        self.house_hand_num_values.append(house_card.num_value)
-        self.house_hand_value += house_card.num_value
+        house_card = self.house.shoe.pop()
+        self.house.hand.append(house_card)
+        self.house.hand_num_values.append(house_card.num_value)
+        self.house.hand_value += house_card.num_value
 
     def view_game(self):
         print("House Hand: ")
-        print(self.house_hand)
+        print(self.house.hand)
         print()
         print("User Hand: ")
         print(self.player.hand)
         print()
 
     def start_game(self):
-        self.over = 0
 
-        self.shoe_shuffle()
+        self.player.clear_hand()
+        self.house.clear_hand()
+
+        self.over = 0
 
         self.player.money -= self.main_bet
 
@@ -98,14 +111,14 @@ class Game:
         self.player_draw()
         self.house_draw()
 
-        self.view_game()
+        # self.view_game()
 
-        if self.player.hand_value == 21 and self.house_hand_value == 21:
+        if self.player.hand_value == 21 and self.house.hand_value == 21:
             self.over = 1
-            self.player.money += self.main_bet
         elif self.player.hand_value == 21:
             self.over = 1
-            self.player.money += 2.5 * self.main_bet
+        elif self.house_hand_value == 21:
+            self.over = 1
         else:
             pass
 
@@ -116,49 +129,50 @@ class Game:
                 self.player.hand_num_values.append(1)
                 self.player.hand_value = sum(self.player.hand_num_values)
 
-            while 11 in self.house_hand_num_values and self.house_hand_value > 21:
-                self.house_hand_num_values.remove(11)
-                self.house_hand_num_values.append(1)
-                self.house_hand_value = sum(self.house_hand_num_values)
+            while 11 in self.house.hand_num_values and self.house.hand_value > 21:
+                self.house.hand_num_values.remove(11)
+                self.house.hand_num_values.append(1)
+                self.house.hand_value = sum(self.house.hand_num_values)
 
             if self.player.hand_value >= 21:
                 self.over = 1
 
-            if self.house_hand_value >= 21:
+            if self.house.hand_value >= 21:
                 self.over = 1
 
-        while self.over == 0:
-            option = 0
-            #option = input("Hit or Stick (H/S): ")
-            if self.player.hand_value < 17:
-                option = "H"
-            else:
-                option = "S"
-
-            if option == "S":
-                break
-
-            elif option == "H":
+        if self.over == 0:
+            while self.player.hand_value < 17:  # change to incorporate card counting
                 self.player_draw()
-                if self.house_hand_value <= 17:
-                    self.house_draw()
 
-            check_game()
+                while 11 in self.player.hand_num_values and self.player.hand_value > 21:
+                    self.player.hand_num_values.remove(11)
+                    self.player.hand_num_values.append(1)
+                    self.player.hand_value = sum(self.player.hand_num_values)
 
-            self.view_game()
+        if self.over == 0 and self.player.hand_value <= 21:
+            while self.house.hand_value <= 17:
+                self.house_draw()
 
-        while self.house_hand_value <= 17:
-            self.house_draw()
+            while 11 in self.house.hand_num_values and self.house.hand_value > 21:
+                self.house.hand_num_values.remove(11)
+                self.house.hand_num_values.append(1)
+                self.house.hand_value = sum(self.house.hand_num_values)
 
-        if self.player.hand_value > 21:
-            pass
-        elif self.house_hand_value > 21:
-            self.player.money += 2.5 * self.main_bet
-        elif self.player.hand_value == self.house_hand_value:
+        # add blackjack conditions here
+        if self.house.hand_value == 21 and self.player.hand_value == 21:
             self.player.money += self.main_bet
-        elif self.player.hand_value > self.house_hand_value:
-            self.player.money += 2 * self.main_bet
-        elif self.house_hand_value > self.player.hand_value:
-            pass
-        else:
-            pass
+        elif self.player.hand_value == 21 and len(self.player.hand) == 2:
+            self.player.money += 2.5*self.main_bet
+        elif self.player.hand_value == 21:
+            self.player.money += 2*self.main_bet
+        elif (self.player.hand_value > self.house.hand_value) and self.player.hand_value < 21:
+            self.player.money += 2*self.main_bet
+        elif (self.player.hand_value <= 21) and (self.house.hand_value > 21):
+            self.player.money += 2*self.main_bet
+        elif self.player.hand_value == self.house.hand_value and self.player.hand_value < 21:
+            self.player.money += self.main_bet
+
+        # tests
+        #self.view_game()
+        #print(self.over)
+        #print(self.player.money)

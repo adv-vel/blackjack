@@ -1,1 +1,1 @@
-from .game import Card, Game, Player
+from .game import Card, Game, Player, House
