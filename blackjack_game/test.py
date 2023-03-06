@@ -16,7 +16,6 @@ def blackjack_test():
 
     return me.money
 
-
 profits = []
 
 for x in range(0, 100):

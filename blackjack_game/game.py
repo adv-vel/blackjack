@@ -1,6 +1,5 @@
 from random import shuffle
 
-
 class Player:
     def __init__(self, money):
         self.money = money
@@ -66,9 +65,6 @@ class Game:
         self.shoe = []
         self.player = player
         self.house = house
-        self.house_hand = []
-        self.house_hand_value = 0
-        self.house_hand_num_values = []
         self.main_bet = bet_value
         for x in range(0, decks):
             for s in ["Spades", "Diamonds", "Clubs", "Hearts"]:
@@ -117,28 +113,10 @@ class Game:
             self.over = 1
         elif self.player.hand_value == 21:
             self.over = 1
-        elif self.house_hand_value == 21:
+        elif self.house.hand_value == 21:
             self.over = 1
         else:
             pass
-
-        def check_game():
-
-            while 11 in self.player.hand_num_values and self.player.hand_value > 21:
-                self.player.hand_num_values.remove(11)
-                self.player.hand_num_values.append(1)
-                self.player.hand_value = sum(self.player.hand_num_values)
-
-            while 11 in self.house.hand_num_values and self.house.hand_value > 21:
-                self.house.hand_num_values.remove(11)
-                self.house.hand_num_values.append(1)
-                self.house.hand_value = sum(self.house.hand_num_values)
-
-            if self.player.hand_value >= 21:
-                self.over = 1
-
-            if self.house.hand_value >= 21:
-                self.over = 1
 
         if self.over == 0:
             while self.player.hand_value < 17:  # change to incorporate card counting
