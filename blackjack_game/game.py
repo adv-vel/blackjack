@@ -1,5 +1,6 @@
 from random import shuffle
 
+
 class Player:
     def __init__(self, money):
         self.money = money
@@ -61,11 +62,13 @@ class House:
 
 class Game:
 
-    def __init__(self, decks, player, house, bet_value):
+    def __init__(self, decks, player, house, bet_value, insurance_bet=1, insurance=0):
         self.shoe = []
         self.player = player
         self.house = house
         self.main_bet = bet_value
+        self.insurance = insurance
+        self.insurance_bet = insurance_bet
         for x in range(0, decks):
             for s in ["Spades", "Diamonds", "Clubs", "Hearts"]:
                 for v in [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]:
@@ -109,6 +112,13 @@ class Game:
 
         # self.view_game()
 
+        # implement insurance
+
+        if self.house.hand_num_values[0] == 11 and self.insurance == 1:
+            self.player.money -= self.insurance_bet
+            if self.house.hand_num_values[1] == 10:
+                self.player.money += 3 * self.insurance_bet
+
         if self.player.hand_value == 21 and self.house.hand_value == 21:
             self.over = 1
         elif self.player.hand_value == 21:
@@ -140,17 +150,17 @@ class Game:
         if self.house.hand_value == 21 and self.player.hand_value == 21:
             self.player.money += self.main_bet
         elif self.player.hand_value == 21 and len(self.player.hand) == 2:
-            self.player.money += 2.5*self.main_bet
+            self.player.money += 2.5 * self.main_bet
         elif self.player.hand_value == 21:
-            self.player.money += 2*self.main_bet
+            self.player.money += 2 * self.main_bet
         elif (self.player.hand_value > self.house.hand_value) and self.player.hand_value < 21:
-            self.player.money += 2*self.main_bet
+            self.player.money += 2 * self.main_bet
         elif (self.player.hand_value <= 21) and (self.house.hand_value > 21):
-            self.player.money += 2*self.main_bet
+            self.player.money += 2 * self.main_bet
         elif self.player.hand_value == self.house.hand_value and self.player.hand_value < 21:
             self.player.money += self.main_bet
 
         # tests
-        #self.view_game()
-        #print(self.over)
-        #print(self.player.money)
+        # self.view_game()
+        # print(self.over)
+        # print(self.player.money)
