@@ -2,6 +2,18 @@ from random import shuffle
 
 
 class Player:
+    """
+    class for gambler
+    PROPERTIES
+    ----------
+    money : money available to gamble with
+    hand : current hand for current game
+    hand_num_values : list of cards' numerical values for card in hand
+    hand_value : total value of hand
+    ----------
+    METHODS
+    clear_hand : clears hand to start a new game
+    """
     def __init__(self, money):
         self.money = money
         self.hand = []
@@ -15,7 +27,13 @@ class Player:
 
 
 class Card:
-
+    """
+    Represents each card in suit
+    PROPERTIES
+    ------------
+    value : value given on card
+    num_value : numerical value, 1-10 1/11 for Aces
+    """
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
@@ -32,6 +50,20 @@ class Card:
 
 
 class House:
+    """
+    Represents dealer / house who is playing the game
+    PROPERTIES
+    ----------
+    decks : number of decks cards are drawn from
+    shoe : list of cards in shoe
+    hand : list of cards in hand for current game
+    hand_num_values : list of numerical values for card in hand
+    hand_value : Total numerical value of hand
+    ----------
+    METHODS
+    clear_hand : gets rid of hand to start new game
+    new_shoe : shoe is reset
+    """
     def __init__(self, decks):
 
         self.decks = decks
@@ -61,6 +93,23 @@ class House:
 
 
 class Game:
+    """
+    class for Current Game
+    PROPERTIES
+    ----------
+    shoe : current shoe being used
+    player : gambler
+    house : dealer / casino
+    main_bet : value of bet placed on main game
+    insurance : odds for insurance
+    insurance_bet : value of bet placed on insurance by player
+    -----------
+    METHODS
+    player_draw : player draws a card
+    house_draw : house draws a card
+    view_game : presents overview of game (mainly for testing purposes)
+    start_game : game begins
+    """
 
     def __init__(self, decks, player, house, bet_value, insurance_bet=1, insurance=0):
         self.shoe = []

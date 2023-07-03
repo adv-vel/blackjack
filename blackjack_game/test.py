@@ -1,4 +1,6 @@
 from blackjack_game import Card, Game, Player, House
+
+
 def blackjack_test():
     me = Player(1000)
     for i in range(0, 10):
@@ -16,6 +18,7 @@ def blackjack_test():
 
     return me.money
 
+
 profits = []
 
 for x in range(0, 100):
@@ -23,4 +26,4 @@ for x in range(0, 100):
 
 x_vals = [x for x in range(0, 100)]
 print(sum(profits) / (100 * 200))
-#calculated house edge of approx. 4.5%
+# calculated house edge of approx. 4.5%
