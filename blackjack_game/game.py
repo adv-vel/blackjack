@@ -34,9 +34,10 @@ class Card:
     value : value given on card
     num_value : numerical value, 1-10 1/11 for Aces
     """
-    def __init__(self, value, suit):
+    def __init__(self, value, suit, hidden=True):
         self.value = value
         self.suit = suit
+        self.hidden = hidden
 
         if value in ["J", "K", "Q"]:
             self.num_value = 10
@@ -125,12 +126,14 @@ class Game:
 
     def player_draw(self):
         player_card = self.house.shoe.pop()
+        player_card.hidden = False
         self.player.hand.append(player_card)
         self.player.hand_num_values.append(player_card.num_value)
         self.player.hand_value += player_card.num_value
 
-    def house_draw(self):
+    def house_draw(self, hidden=False):
         house_card = self.house.shoe.pop()
+        house_card.hidden = hidden
         self.house.hand.append(house_card)
         self.house.hand_num_values.append(house_card.num_value)
         self.house.hand_value += house_card.num_value
