@@ -33,8 +33,9 @@ class Card:
     ------------
     value : value given on card
     num_value : numerical value, 1-10 1/11 for Aces
+    hidden : True if card is face down, False if face up, default False
     """
-    def __init__(self, value, suit, hidden=True):
+    def __init__(self, value, suit, hidden=False):
         self.value = value
         self.suit = suit
         self.hidden = hidden
@@ -119,6 +120,7 @@ class Game:
         self.main_bet = bet_value
         self.insurance = insurance
         self.insurance_bet = insurance_bet
+        self.over = 0 # is current game finished?
         for x in range(0, decks):
             for s in ["Spades", "Diamonds", "Clubs", "Hearts"]:
                 for v in [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]:
@@ -126,7 +128,6 @@ class Game:
 
     def player_draw(self):
         player_card = self.house.shoe.pop()
-        player_card.hidden = False
         self.player.hand.append(player_card)
         self.player.hand_num_values.append(player_card.num_value)
         self.player.hand_value += player_card.num_value
@@ -162,55 +163,71 @@ class Game:
         self.player_draw()
         self.house_draw()
 
-        # self.view_game()
-
-        # implement insurance
-
-        if self.house.hand_num_values[0] == 11 and self.insurance == 1:
-            self.player.money -= self.insurance_bet
-            if self.house.hand_num_values[1] == 10:
-                self.player.money += 3 * self.insurance_bet
-
-        if self.player.hand_value == 21 and self.house.hand_value == 21:
+        if self.house.hand_value == 21 and self.player.hand_value != 21:
+            self.over = 1 # player loses
+        elif self.house.hand_value == 21 and self.player.hand_value == 21:
+            self.player.money += self.main_bet # player regains initial bet
             self.over = 1
-        elif self.player.hand_value == 21:
-            self.over = 1
-        elif self.house.hand_value == 21:
+        elif self.house.hand_value != 21 and self.player.hand_value == 21:
+            self.player.money += 2 * self.main_bet # 2 is placeholder for blackjack odds CHANGE LATER
             self.over = 1
         else:
             pass
 
-        if self.over == 0:
-            while self.player.hand_value < 17:  # change to incorporate card counting
-                self.player_draw()
-
-                while 11 in self.player.hand_num_values and self.player.hand_value > 21:
-                    self.player.hand_num_values.remove(11)
-                    self.player.hand_num_values.append(1)
-                    self.player.hand_value = sum(self.player.hand_num_values)
-
-        if self.over == 0 and self.player.hand_value <= 21:
-            while self.house.hand_value <= 17:
+        if self.over == 0 and self.player.hand_value < 21:
+            #IMPLEMENT STRATEGY FOR PLAYER
+            while self.house.hand_value < 17:
                 self.house_draw()
+        # self.view_game()
 
-            while 11 in self.house.hand_num_values and self.house.hand_value > 21:
-                self.house.hand_num_values.remove(11)
-                self.house.hand_num_values.append(1)
-                self.house.hand_value = sum(self.house.hand_num_values)
+        # implement insurance
 
-        # add blackjack conditions here
-        if self.house.hand_value == 21 and self.player.hand_value == 21:
-            self.player.money += self.main_bet
-        elif self.player.hand_value == 21 and len(self.player.hand) == 2:
-            self.player.money += 2.5 * self.main_bet
-        elif self.player.hand_value == 21:
-            self.player.money += 2 * self.main_bet
-        elif (self.player.hand_value > self.house.hand_value) and self.player.hand_value < 21:
-            self.player.money += 2 * self.main_bet
-        elif (self.player.hand_value <= 21) and (self.house.hand_value > 21):
-            self.player.money += 2 * self.main_bet
-        elif self.player.hand_value == self.house.hand_value and self.player.hand_value < 21:
-            self.player.money += self.main_bet
+
+        # if self.house.hand_num_values[0] == 11 and self.insurance == 1:
+        #     self.player.money -= self.insurance_bet
+        #     if self.house.hand_num_values[1] == 10:
+        #         self.player.money += 3 * self.insurance_bet
+        #
+        # if self.player.hand_value == 21 and self.house.hand_value == 21:
+        #     self.over = 1
+        # elif self.player.hand_value == 21:
+        #     self.over = 1
+        # elif self.house.hand_value == 21:
+        #     self.over = 1
+        # else:
+        #     pass
+        #
+        # if self.over == 0:
+        #     while self.player.hand_value < 17:  # change to incorporate card counting
+        #         self.player_draw()
+        #
+        #         while 11 in self.player.hand_num_values and self.player.hand_value > 21:
+        #             self.player.hand_num_values.remove(11)
+        #             self.player.hand_num_values.append(1)
+        #             self.player.hand_value = sum(self.player.hand_num_values)
+        #
+        # if self.over == 0 and self.player.hand_value <= 21:
+        #     while self.house.hand_value <= 17:
+        #         self.house_draw()
+        #
+        #     while 11 in self.house.hand_num_values and self.house.hand_value > 21:
+        #         self.house.hand_num_values.remove(11)
+        #         self.house.hand_num_values.append(1)
+        #         self.house.hand_value = sum(self.house.hand_num_values)
+        #
+        # # add blackjack conditions here
+        # if self.house.hand_value == 21 and self.player.hand_value == 21:
+        #     self.player.money += self.main_bet
+        # elif self.player.hand_value == 21 and len(self.player.hand) == 2:
+        #     self.player.money += 2.5 * self.main_bet
+        # elif self.player.hand_value == 21:
+        #     self.player.money += 2 * self.main_bet
+        # elif (self.player.hand_value > self.house.hand_value) and self.player.hand_value < 21:
+        #     self.player.money += 2 * self.main_bet
+        # elif (self.player.hand_value <= 21) and (self.house.hand_value > 21):
+        #     self.player.money += 2 * self.main_bet
+        # elif self.player.hand_value == self.house.hand_value and self.player.hand_value < 21:
+        #     self.player.money += self.main_bet
 
         # tests
         # self.view_game()
